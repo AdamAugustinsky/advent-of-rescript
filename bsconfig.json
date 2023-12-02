@@ -1,11 +1,11 @@
 {
-  "name": "rescript-project-template",
+  "name": "advent-of-rescript",
   "sources": {
     "dir": "src",
     "subdirs": true
   },
   "package-specs": {
-    "module": "commonjs",
+    "module": "es6",
     "in-source": true
   },
   "suffix": ".bs.js",

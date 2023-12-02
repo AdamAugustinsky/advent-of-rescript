@@ -11,6 +11,7 @@
     "res:clean": "rescript clean",
     "res:dev": "rescript build -w"
   },
+  "type": "module",
   "dependencies": {
     "@rescript/core": "*",
     "rescript": "*"

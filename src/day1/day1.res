@@ -1,4 +1,4 @@
-let input = Node.Fs.readFileSync("./src/day1input", #utf8)
+let input = Node.Fs.readFileSync("./src/day1/input", #utf8)
 let lines = String.split(input, "\n")
 
 //replace all non-numeric characters with nothing
@@ -23,6 +23,7 @@ let find_first = (str: string, ~reverse: bool) => {
       // reached end of string
       if start === end_of_loop && pointer === end_of_loop {
         None
+      // pointer reached enf of string, increment starter and reset pointer
       } else if pointer == end_of_loop {
         aux(str, ~start=start + increment, ~pointer=reverse ? String.length(str) : 0, ~reverse)
       } else {
@@ -32,6 +33,7 @@ let find_first = (str: string, ~reverse: bool) => {
   }
   aux(
     str,
+    // start pointer and start at the end of the string if reverse is true
     ~start=reverse ? String.length(str) : 0,
     ~pointer=reverse ? String.length(str) - 1 : 1,
     ~reverse,

@@ -5,7 +5,7 @@ import * as Core__Int from "@rescript/core/src/Core__Int.bs.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.bs.js";
 import * as Core__Option from "@rescript/core/src/Core__Option.bs.js";
 
-var input = Fs.readFileSync("./src/day1input", "utf8");
+var input = Fs.readFileSync("./src/day1/input", "utf8");
 
 var lines = input.split("\n");
 

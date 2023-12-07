@@ -53,21 +53,17 @@ module Day3Part2 = {
     let (x_min, x_max) = x_range
     let (y_min, y_max) = y_range
 
-    Array.slice(lines, ~start=y_min, ~end=y_max + 1)->Array.reduceWithIndex(None, (
-      acc,
-      line,
-      line_index,
-    ) => {
-      let num_surroudings = String.substring(line, ~start=x_min, ~end=x_max)
-      let find_star = String.searchOpt(num_surroudings, %re("/\*/g"))
-
-      let gear_part = Option.map(find_star, x => {
-        gear_pos: (y_min + line_index, x_min + x),
+    lines
+    ->Array.slice(~start=y_min, ~end=y_max + 1)
+    ->Array.reduceWithIndex(None, (acc, line, line_index) =>
+      String.substring(line, ~start=x_min, ~end=x_max)
+      ->String.searchOpt(%re("/\*/g"))
+      ->Option.map(x => {
+        gear_pos: (line_index + y_min, x_min + x),
         num: num->Int.fromString->Option.getOr(0),
       })
-
-      Option.orElse(gear_part, acc)
-    })
+      ->Option.orElse(acc)
+    )
   }
 
   let regex_numbers = %re("/[0-9]+/g")
@@ -83,35 +79,44 @@ module Day3Part2 = {
       let x_min = number_index > 0 ? number_index - 1 : number_index
       let x_max = number_index + String.length(n) + 1
 
-      search_gear_parts(
-        lines,
-        ~x_range=(x_min, x_max),
-        ~y_range=(line_index > 0 ? line_index - 1 : line_index, line_index + 1),
-        n,
-      )
+      let y_min = line_index > 0 ? line_index - 1 : line_index
+      let y_max = line_index + 1
+
+      search_gear_parts(lines, ~x_range=(x_min, x_max), ~y_range=(y_min, y_max), n)
     })
     ->Array.keepSome
   })->Array.flat
 
-  let rec sum_gear_powers = (gear_parts, acc) => {
-    let opt_gear = gear_parts[0]
+  let find_index_to_opt = i =>
+    switch i {
+    | -1 => None
+    | i => Some(i)
+    }
+  let rec sum_gear_powers = (~acc=0, gear_parts) => {
+    let current_gear = Array.at(gear_parts, 0)
 
-    Option.mapOr(opt_gear, acc, gear =>
-      gear_parts
-      ->Array.findIndexOpt(g => g.gear_pos == gear.gear_pos && g.num !== gear.num)
-      ->Option.mapOr(acc, pair_index => {
-        let gear_power = gear_parts[pair_index]->Option.mapOr(0, pair => gear.num * pair.num)
+    Option.mapOr(current_gear, acc, gear => {
+      let pair_index_opt =
+        gear_parts
+        ->Array.findIndexWithIndex((g, g_index) => g.gear_pos == gear.gear_pos && g_index !== 0)
+        ->find_index_to_opt
 
-        let parts_without_current_gear = Array.filter(
-          gear_parts,
-          x => Array.indexOf(gear_parts, x) !== pair_index && x !== gear,
-        )
+      let gear_power = Option.mapOr(pair_index_opt, 0, pair_index =>
+        Array.at(gear_parts, pair_index)->Option.mapOr(0, pair => gear.num * pair.num)
+      )
 
-        sum_gear_powers(parts_without_current_gear, acc + gear_power)
-      })
-    )
+      // pair is set to 0 if not present, because 0 will be removed anyway
+      let gear_pair_to_remove = Option.mapOr(pair_index_opt, 0, pair_index => pair_index)
+
+      let parts_without_current_gear = Array.filterWithIndex(gear_parts, (_, i) =>
+        // removes current gear and its pair
+        i !== gear_pair_to_remove && i !== 0
+      )
+
+      sum_gear_powers(~acc=acc + gear_power, parts_without_current_gear)
+    })
   }
-  let res = sum_gear_powers(gear_parts, 0)
+  let res = sum_gear_powers(gear_parts)
 }
 
 Console.log(Day3Part2.res)
